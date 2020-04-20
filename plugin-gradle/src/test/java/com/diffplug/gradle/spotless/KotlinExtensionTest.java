@@ -46,6 +46,24 @@ public class KotlinExtensionTest extends GradleIntegrationTest {
 	}
 
 	@Test
+	public void integrationKtfmt() throws IOException {
+		setFile("build.gradle").toLines(
+				"plugins {",
+				"    id 'nebula.kotlin' version '1.0.6'",
+				"    id 'com.diffplug.gradle.spotless'",
+				"}",
+				"repositories { mavenCentral() }",
+				"spotless {",
+				"    kotlin {",
+				"        ktfmt()",
+				"    }",
+				"}");
+		setFile("src/main/kotlin/basic.kt").toResource("kotlin/ktfmt/basic.dirty");
+		gradleRunner().withArguments("spotlessApply").build();
+		assertFile("src/main/kotlin/basic.kt").sameAsResource("kotlin/ktfmt/basic.clean");
+	}
+
+	@Test
 	public void testWithIndentation() throws IOException {
 		setFile("build.gradle").toLines(
 				"plugins {",
@@ -83,6 +101,25 @@ public class KotlinExtensionTest extends GradleIntegrationTest {
 	}
 
 	@Test
+	public void testWithHeaderKtfmt() throws IOException {
+		setFile("build.gradle").toLines(
+				"plugins {",
+				"    id 'nebula.kotlin' version '1.0.6'",
+				"    id 'com.diffplug.gradle.spotless'",
+				"}",
+				"repositories { mavenCentral() }",
+				"spotless {",
+				"    kotlin {",
+				"        licenseHeader('" + HEADER + "')",
+				"        ktfmt()",
+				"    }",
+				"}");
+		setFile("src/main/kotlin/test.kt").toResource("kotlin/licenseheader/KotlinCodeWithoutHeader.test");
+		gradleRunner().withArguments("spotlessApply").build();
+		assertFile("src/main/kotlin/test.kt").hasContent(HEADER + "\n" + getTestResource("kotlin/licenseheader/KotlinCodeWithoutHeader.test"));
+	}
+
+	@Test
 	public void testWithCustomHeaderSeparator() throws IOException {
 		setFile("build.gradle").toLines(
 				"plugins {",
@@ -102,6 +139,25 @@ public class KotlinExtensionTest extends GradleIntegrationTest {
 	}
 
 	@Test
+	public void testWithCustomHeaderSeparatorKtfmt() throws IOException {
+		setFile("build.gradle").toLines(
+				"plugins {",
+				"    id 'nebula.kotlin' version '1.0.6'",
+				"    id 'com.diffplug.gradle.spotless'",
+				"}",
+				"repositories { mavenCentral() }",
+				"spotless {",
+				"    kotlin {",
+				"        licenseHeader ('" + HEADER + "', '@file')",
+				"        ktfmt()",
+				"    }",
+				"}");
+		setFile("src/main/kotlin/test.kt").toResource("kotlin/licenseheader/KotlinCodeWithoutHeader.test");
+		gradleRunner().withArguments("spotlessApply").build();
+		assertFile("src/main/kotlin/test.kt").hasContent(HEADER + "\n" + getTestResource("kotlin/licenseheader/KotlinCodeWithoutHeader.test"));
+	}
+
+	@Test
 	public void testWithNonStandardYearSeparator() throws IOException {
 		setFile("build.gradle").toLines(
 				"plugins {",
@@ -113,6 +169,32 @@ public class KotlinExtensionTest extends GradleIntegrationTest {
 				"    kotlin {",
 				"        licenseHeader('" + HEADER_WITH_YEAR + "').yearSeparator(', ')",
 				"        ktlint()",
+				"    }",
+				"}");
+
+		setFile("src/main/kotlin/test.kt").toResource("kotlin/licenseheader/KotlinCodeWithMultiYearHeader.test");
+		setFile("src/main/kotlin/test2.kt").toResource("kotlin/licenseheader/KotlinCodeWithMultiYearHeader2.test");
+		gradleRunner().withArguments("spotlessApply").build();
+		assertFile("src/main/kotlin/test.kt").matches(matcher -> {
+			matcher.startsWith("// License Header 2012, 2014");
+		});
+		assertFile("src/main/kotlin/test2.kt").matches(matcher -> {
+			matcher.startsWith(HEADER_WITH_YEAR.replace("$YEAR", String.valueOf(YearMonth.now().getYear())));
+		});
+	}
+
+	@Test
+	public void testWithNonStandardYearSeparatorKtfmt() throws IOException {
+		setFile("build.gradle").toLines(
+				"plugins {",
+				"    id 'nebula.kotlin' version '1.0.6'",
+				"    id 'com.diffplug.gradle.spotless'",
+				"}",
+				"repositories { mavenCentral() }",
+				"spotless {",
+				"    kotlin {",
+				"        licenseHeader('" + HEADER_WITH_YEAR + "').yearSeparator(', ')",
+				"        ktfmt()",
 				"    }",
 				"}");
 
