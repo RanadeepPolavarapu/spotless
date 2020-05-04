@@ -125,4 +125,14 @@ public class GoogleJavaFormatStepTest extends ResourceHarness {
 		String input = StringPrinter.buildStringFromLines(lines);
 		Assert.assertEquals(input, GoogleJavaFormatStep.fixWindowsBug(input, "1.1"));
 	}
+
+	@Test
+	public void behaviorGfj1Point8AndJDK11() throws Exception {
+		FormatterStep step = GoogleJavaFormatStep.create("1.8", TestProvisioner.mavenCentral());
+		StepHarness.forStep(step)
+				.testResource("java/googlejavaformat/JavaCodeUnformatted.test", "java/googlejavaformat/JavaCodeFormatted.test")
+				.testResource("java/googlejavaformat/JavaCodeWithLicenseUnformatted.test", "java/googlejavaformat/JavaCodeWithLicenseFormatted.test")
+				.testResource("java/googlejavaformat/JavaCodeWithLicensePackageUnformatted.test", "java/googlejavaformat/JavaCodeWithLicensePackageFormatted.test")
+				.testResource("java/googlejavaformat/JavaCodeWithPackageUnformatted.test", "java/googlejavaformat/JavaCodeWithPackageFormatted.test");
+	}
 }
